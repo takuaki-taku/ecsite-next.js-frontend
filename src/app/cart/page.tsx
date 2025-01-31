@@ -1,46 +1,43 @@
-'use client';
-
+'use client'
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
-
-interface Category {
-  id: number;
-  name: string;
-}
-
-interface Item {
-  id: number;
-  name: string;
-  price: number;
-  description: string;
-  image: string | null;
-  category: Category;
-}
+import { useAuth } from '../context/AuthContext';
+import fetchWithToken from '../utils/api';
 
 interface CartItem {
   id: number;
-  item: Item;
+  item: {
+    id: number;
+    name: string;
+    price: number;
+  };
   quantity: number;
 }
 
 interface Cart {
+  id: number;
   cart_items: CartItem[];
   total_price: number;
 }
 
 export default function CartPage() {
   const [cart, setCart] = useState<Cart | null>(null);
+  const { isLoggedIn } = useAuth();
 
   useEffect(() => {
     const fetchCart = async () => {
-      // TODO: ユーザーIDを取得してカート情報を取得する
-      const response = await fetch('http://127.0.0.1:8000/api/cart/1');
-      const data = await response.json();
-      setCart(data);
+      try {
+        // ログインしている場合のみカート情報を取得
+        if (isLoggedIn) {
+          const data = await fetchWithToken('http://localhost:8000/api/cart/1/');
+          setCart(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch cart:', error);
+      }
     };
 
     fetchCart();
-  }, []);
+  }, [isLoggedIn]);
 
   if (!cart) {
     return <div>Loading...</div>;
@@ -82,24 +79,9 @@ export default function CartPage() {
                 </tr>
               </tbody>
             </table>
-            <div className="text-center">
-              <form method="post" action="">
-                <Link href="/" className="btn btn-secondary">
-                  ショッピングを続ける
-                </Link>
-                <button type="submit" className="btn btn-dark">
-                  購入へ進む
-                </button>
-              </form>
-            </div>
           </>
         ) : (
-          <div className="text-center">
-            <p>カートは空です。</p>
-            <Link href="/" className="btn btn-secondary">
-              商品を探す
-            </Link>
-          </div>
+          <p>カートに商品はありません。</p>
         )}
       </div>
     </main>
