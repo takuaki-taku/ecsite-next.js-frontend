@@ -1,6 +1,22 @@
+"use client"
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 
 const Header = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const accessToken = localStorage.getItem('access_token');
+    setIsLoggedIn(!!accessToken);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    setIsLoggedIn(false);
+    window.location.href = '/'; // ホームにリダイレクト
+  };
+
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light">
       <div className="container px-4 px-lg-5">
@@ -25,22 +41,31 @@ const Header = () => {
                 Home
               </Link>
             </li>
-            {/* TODO: ログイン状態によって表示を切り替える */}
             <li className="nav-item">
               <Link className="nav-link" href="/cart">
                 カート
               </Link>
             </li>
-            <li className="nav-item">
-              <Link className="nav-link" href="/login">
-                ログイン
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" href="/signup">
-                サインアップ
-              </Link>
-            </li>
+            {isLoggedIn ? (
+              <li className="nav-item">
+                <button className="nav-link" onClick={handleLogout}>
+                  ログアウト
+                </button>
+              </li>
+            ) : (
+              <>
+                <li className="nav-item">
+                  <Link className="nav-link" href="/login">
+                    ログイン
+                  </Link>
+                </li>
+                <li className="nav-item">
+                  <Link className="nav-link" href="/signup">
+                    サインアップ
+                  </Link>
+                </li>
+              </>
+            )}
           </ul>
         </div>
       </div>

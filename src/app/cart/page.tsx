@@ -1,7 +1,6 @@
-'use client'
+"use client"
 import { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
-import fetchWithToken from '../utils/api';
+import fetchWithToken from '@/app/utils/api';
 
 interface CartItem {
   id: number;
@@ -21,15 +20,25 @@ interface Cart {
 
 export default function CartPage() {
   const [cart, setCart] = useState<Cart | null>(null);
-  const { isLoggedIn } = useAuth();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const accessToken = localStorage.getItem('access_token');
+    setIsLoggedIn(!!accessToken);
+  }, []);
 
   useEffect(() => {
     const fetchCart = async () => {
       try {
-        // ログインしている場合のみカート情報を取得
         if (isLoggedIn) {
-          const data = await fetchWithToken('http://localhost:8000/api/cart/1/');
-          setCart(data);
+          // ユーザーIDを取得する処理を追加
+          const accessToken = localStorage.getItem('access_token');
+          if (accessToken) {
+            const tokenPayload = JSON.parse(atob(accessToken.split('.')[1]));
+            const userId = tokenPayload.user_id;
+            const data = await fetchWithToken(`http://localhost:8000/api/cart/${userId}/`);
+            setCart(data);
+          }
         }
       } catch (error) {
         console.error('Failed to fetch cart:', error);

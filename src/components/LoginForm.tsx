@@ -1,9 +1,12 @@
+"use client"
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 const LoginForm = ({ onLogin }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,6 +29,7 @@ const LoginForm = ({ onLogin }) => {
       localStorage.setItem('access_token', data.access);
       localStorage.setItem('refresh_token', data.refresh);
       onLogin(); // ログイン成功時に親コンポーネントに通知
+      router.push('/'); // ホームページにリダイレクト
     } catch (err) {
       setError('ログイン中にエラーが発生しました');
     }
